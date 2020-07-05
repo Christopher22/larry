@@ -7,7 +7,7 @@ use larry\model\User;
 
 class TestUser extends TestCase {
 
-	public function testPrepare(): PDO {
+	public function test_prepare(): PDO {
 		$database = new PDO( 'sqlite::memory:' );
 		// Raise exceptions for easier debugging:
 		// $database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -17,29 +17,33 @@ class TestUser extends TestCase {
 	}
 
 	/**
-	 * @depends testPrepare
+	 * @depends test_prepare
 	 */
-	public function testAddUser( PDO $database ) {
+	public function test_add_user( PDO $database ) {
 		$user1 = new User( $database, 1, "Max Muster" );
 		$user2 = new User( $database, 2, "Marian Muster" );
+
+		$this->assertFalse( $user1->exists() );
 		$this->assertTrue( $user1->create() );
+		$this->assertTrue( $user1->exists() );
+
 		$this->assertTrue( $user2->create() );
 
 		return $database;
 	}
 
 	/**
-	 * @depends testAddUser
+	 * @depends test_add_user
 	 */
-	public function testAddExistingUser( PDO $database ) {
+	public function test_add_existing_user( PDO $database ) {
 		$user = new User( $database, 1, "Larry Doe" );
 		$this->assertFalse( $user->create() );
 	}
 
 	/**
-	 * @depends testAddUser
+	 * @depends test_add_user
 	 */
-	public function testQuery( PDO $database ) {
+	public function test_query( PDO $database ) {
 		$data = User::load( $database, 1, 5, 2, 3 );
 		$this->assertCount( 2, $data );
 		$this->assertEquals( "Max Muster", $data[0]->name() );

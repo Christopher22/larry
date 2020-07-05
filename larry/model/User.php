@@ -38,6 +38,21 @@ class User {
 	}
 
 	/**
+	 * @return bool True, if the user exists in the database.
+	 */
+	public function exists(): bool {
+		$statement = $this->database->prepare( sprintf(
+			'SELECT EXISTS(SELECT 1 FROM %s WHERE id = :id)',
+			self::TABLE_NAME
+		) );
+
+		return $statement !== false
+		       && $statement->bindValue( 'id', $this->id, PDO::PARAM_INT )
+		       && $statement->execute()
+		       && $statement->fetchColumn() == 1;
+	}
+
+	/**
 	 * @return int The unique id of the user.
 	 */
 	public function id(): int {
@@ -74,7 +89,7 @@ class User {
 	public static function load( PDO $database, int ...$ids ): array {
 		$result = array();
 		$query  = $database->prepare(
-			sprintf( 'SELECT user_name FROM %s WHERE id == ? ORDER BY id ASC',
+			sprintf( 'SELECT user_name FROM %s WHERE id = ? ORDER BY id ASC',
 				self::TABLE_NAME )
 		);
 		if ( $query === false ) {

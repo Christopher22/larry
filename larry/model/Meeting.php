@@ -75,7 +75,7 @@ class Meeting {
 		$statement = $this->database->prepare( sprintf(
 			( $availability->is_available() === null
 				?
-				'DELETE FROM %s WHERE id == :id AND user_id == :user_id'
+				'DELETE FROM %s WHERE id = :id AND user_id = :user_id'
 				:
 				'REPLACE INTO %s (id, user_id, is_available) VALUES (:id, :user_id, :is_available)'
 			),
@@ -112,7 +112,7 @@ class Meeting {
 	public function availabilities(): array {
 		$raw_users = array();
 		$statement = $this->database->prepare( sprintf(
-			'SELECT user_id, is_available FROM %s WHERE id == ? ORDER BY user_id ASC',
+			'SELECT user_id, is_available FROM %s WHERE id = ? ORDER BY user_id ASC',
 			self::TABLE_NAME
 		) );
 
