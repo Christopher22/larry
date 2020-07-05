@@ -3,9 +3,6 @@
 
 namespace larry\model;
 
-require "User.php";
-require "Availability.php";
-
 use DateTimeImmutable;
 use PDO;
 

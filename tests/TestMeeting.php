@@ -1,6 +1,8 @@
 <?php
 
 require "../larry/model/Meeting.php";
+require "../larry/model/User.php";
+require "../larry/model/Availability.php";
 
 use PHPUnit\Framework\TestCase;
 use larry\model\Meeting;
