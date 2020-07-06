@@ -102,6 +102,40 @@ class Meeting {
 	}
 
 	/**
+	 * Check the availability of a single user.
+	 *
+	 * @param   User  $user  The user.
+	 *
+	 * @return Availability|null The availability or NULL on error.
+	 */
+	public function availability( User $user ): ?Availability {
+		$statement = $this->database->prepare( sprintf(
+			'SELECT is_available FROM %s WHERE id = :id and user_id = :user_id',
+			self::TABLE_NAME
+		) );
+
+		if ( $statement === false
+		     || ! $statement->bindValue( 'id',
+				$this->date->getTimestamp(),
+				PDO::PARAM_INT )
+		     || ! $statement->bindValue( 'user_id',
+				$user->id(),
+				PDO::PARAM_INT )
+		     || ! $statement->execute() ) {
+			return null;
+		}
+
+		$value = $statement->fetch( pdo::FETCH_NUM );
+		if ( $value === false ) {
+			return new Availability( $user, null );
+		} elseif ( $value[0] == 0 ) {
+			return new Availability( $user, false );
+		} else {
+			return new Availability( $user, true );
+		}
+	}
+
+	/**
 	 * Return all the known availabilities ordered by the ids of the users.
 	 *
 	 * @return Availability[] An array of known(!) availabilities.

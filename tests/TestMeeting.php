@@ -35,6 +35,9 @@ class TestMeeting extends TestCase {
 		$date1 = Meeting::from_date( $database, 1997, 4, 22 );
 		$date2 = Meeting::from_date( $database, 1997, 4, 29 );
 
+		// Check that availability returns the correct value if nothing is inserted.
+		$this->assertNull( $date1->availability( $user1 )->is_available() );
+
 		$this->assertTrue( $date3->set_availability( new Availability( $user1,
 			false ) ) );
 		$this->assertTrue( $date1->set_availability( new Availability( $user1,
@@ -68,7 +71,7 @@ class TestMeeting extends TestCase {
 	/**
 	 * @depends test_add
 	 */
-	public function test_query( PDO $database ) {
+	public function test_query_all( PDO $database ) {
 		$availabilities1 = ( Meeting::from_date( $database,
 			1997,
 			4,
@@ -94,6 +97,19 @@ class TestMeeting extends TestCase {
 		$this->assertFalse( $availabilities3[0]->is_available() );
 
 		return $database;
+	}
+
+	/**
+	 * @depends test_add
+	 */
+	public function test_query_single( PDO $database ) {
+		$users = User::load( $database, 1, 2 );
+
+		$date2 = Meeting::from_date( $database, 1997, 4, 29 );
+		$date3 = Meeting::from_date( $database, 1997, 5, 1 );
+
+		$this->assertTrue( $date2->availability( $users[1] )->is_available() );
+		$this->assertFalse( $date3->availability( $users[0] )->is_available() );
 	}
 
 	/**
