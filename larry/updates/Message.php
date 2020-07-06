@@ -29,6 +29,33 @@ class Message extends Update {
 	}
 
 	/**
+	 * Creates the corresponding JSON for a message, mainly for testing reasons.
+	 *
+	 * @param   User    $user     The user of interest
+	 * @param   string  $message  The message.
+	 * @param   int     $id       The id of the message.
+	 *
+	 * @return string The message.
+	 */
+	public static function generate_json(
+		User $user,
+		string $message,
+		int $id = 0
+	): string {
+		return json_encode( array(
+			"update_id" => $id,
+			"message"   => array(
+				"from" => array(
+					"id"         => $user->id(),
+					"first_name" => $user->name(),
+				),
+				"text" => $message,
+			),
+		) );
+	}
+
+
+	/**
 	 * Query the sender of the message.
 	 *
 	 * @param   Context  $config  The runtime context.
