@@ -33,6 +33,7 @@ class MockCommand extends Command {
 
 	public function execute(
 		Context $context,
+		Message $message,
 		string ...$parameters
 	): Result {
 		return new Result( implode( ' ', $parameters ), true );

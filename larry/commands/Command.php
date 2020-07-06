@@ -28,12 +28,14 @@ abstract class Command {
 	 * Executes the command with the given arguments.
 	 *
 	 * @param   Context  $context        The runtime context.
+	 * @param   Message  $message        The message recieved.
 	 * @param   string   ...$parameters  The arguments.
 	 *
 	 * @return Result The status of the command.
 	 */
 	public abstract function execute(
 		Context $context,
+		Message $message,
 		string ...$parameters
 	): Result;
 
@@ -85,7 +87,10 @@ abstract class Command {
 			if ( $command_index !== false ) {
 				// Execute the last command
 				if ( $command !== null ) {
-					$results[] = $command->execute( $context, ...$arguments );
+					$results[] = $command->execute( $context,
+						$message,
+						...
+						$arguments );
 				}
 				$command   = $commands[ $command_index ];
 				$arguments = array();
@@ -96,7 +101,7 @@ abstract class Command {
 
 		// Execute the last command, if present.
 		if ( $command !== null ) {
-			$results[] = $command->execute( $context, ...$arguments );
+			$results[] = $command->execute( $context, $message, ...$arguments );
 		}
 
 		return $results;
