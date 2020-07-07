@@ -1,10 +1,9 @@
 <?php
 
-require "../larry/model/Meeting.php";
-require "../larry/model/User.php";
-require "../larry/model/Availability.php";
+require "../larry/Context.php";
 
 use PHPUnit\Framework\TestCase;
+
 use larry\model\Meeting;
 use larry\model\User;
 use larry\model\Availability;

@@ -1,8 +1,9 @@
 <?php
 
-require "../larry/model/User.php";
+require "../larry/Context.php";
 
 use PHPUnit\Framework\TestCase;
+
 use larry\model\User;
 
 class TestUser extends TestCase {

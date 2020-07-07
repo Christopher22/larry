@@ -1,11 +1,6 @@
 <?php
 
 require "../larry/Context.php";
-require "../larry/updates/Update.php";
-require "../larry/updates/Message.php";
-require "../larry/model/User.php";
-require "../larry/commands/Command.php";
-require "../larry/commands/Result.php";
 
 use PHPUnit\Framework\TestCase;
 
