@@ -23,6 +23,15 @@ class Result {
 		$this->success = $successful;
 	}
 
+	/**
+	 * The result of the command.
+	 *
+	 * @return bool TRUE, if the command was executed successfully.
+	 */
+	public function is_successful(): bool {
+		return $this->success;
+	}
+
 	public function __toString(): string {
 		return $this->message;
 	}
