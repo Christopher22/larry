@@ -21,9 +21,11 @@ class Message extends Update {
 		parent::__construct( $update, 'message' );
 		if ( $this->is_valid()
 		     && ( ! array_key_exists( 'from', $this->content )
+		          || ! array_key_exists( 'chat', $this->content )
 		          || ! array_key_exists( 'id', $this->content['from'] )
 		          || ! array_key_exists( 'first_name',
-					$this->content['from'] ) ) ) {
+					$this->content['from'] )
+		          || ! array_key_exists( 'id', $this->content['chat'] ) ) ) {
 			$this->invalidate();
 		}
 	}
@@ -43,13 +45,16 @@ class Message extends Update {
 		int $id = 0
 	): string {
 		return json_encode( array(
-			"update_id" => $id,
-			"message"   => array(
-				"from" => array(
-					"id"         => $user->id(),
-					"first_name" => $user->name(),
+			'update_id' => $id,
+			'message'   => array(
+				'from' => array(
+					'id'         => $user->id(),
+					'first_name' => $user->name(),
 				),
-				"text" => $message,
+				'text' => $message,
+				'chat' => array(
+					'id' => $user->chat_id(),
+				),
 			),
 		) );
 	}
@@ -64,8 +69,9 @@ class Message extends Update {
 	 */
 	public function sender( Context $config ): User {
 		return new User( $config->database(),
-			$this->content['from']["id"],
-			$this->content['from']["first_name"] );
+			$this->content['from']['id'],
+			$this->content['from']['first_name'],
+			$this->content['chat']['id'] );
 	}
 
 	/**

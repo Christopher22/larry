@@ -50,7 +50,7 @@ class TestMessage extends TestCase {
 	 * @depends test_context
 	 */
 	public function test_parsing( Context $context ): Context {
-		$example_user = new User( $context->database(), 1, "John" );
+		$example_user = new User( $context->database(), 1, "John", 42 );
 		$message      = new Message( Message::generate_json(
 			$example_user,
 			' d /c1 c2    dA /b /C3 1 '
@@ -60,6 +60,8 @@ class TestMessage extends TestCase {
 			$message->sender( $context )->id() );
 		$this->assertEquals( $example_user->name(),
 			$message->sender( $context )->name() );
+		$this->assertEquals( $example_user->chat_id(),
+			$message->sender( $context )->chat_id() );
 		$this->assertEquals( array( 'd', '/c1', 'c2', 'dA', '/b', '/C3', '1' ),
 			$message->tokens( false ) );
 		$this->assertEquals( array( 'd', '/c1', 'c2', 'da', '/b', '/c3', '1' ),

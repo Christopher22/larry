@@ -21,8 +21,8 @@ class TestUser extends TestCase {
 	 * @depends test_prepare
 	 */
 	public function test_add_user( PDO $database ) {
-		$user1 = new User( $database, 1, "Max Muster" );
-		$user2 = new User( $database, 2, "Marian Muster" );
+		$user1 = new User( $database, 1, "Max Muster", 42 );
+		$user2 = new User( $database, 2, "Marian Muster", 43 );
 
 		$this->assertFalse( $user1->exists() );
 		$this->assertTrue( $user1->create() );
@@ -48,6 +48,8 @@ class TestUser extends TestCase {
 		$data = User::load( $database, 1, 5, 2, 3 );
 		$this->assertCount( 2, $data );
 		$this->assertEquals( "Max Muster", $data[0]->name() );
+		$this->assertEquals( 42, $data[0]->chat_id() );
 		$this->assertEquals( "Marian Muster", $data[1]->name() );
+		$this->assertEquals( 43, $data[1]->chat_id() );
 	}
 }
