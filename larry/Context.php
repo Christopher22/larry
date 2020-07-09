@@ -35,16 +35,20 @@ class Context {
 	 * @param   string  $database_string  The database string used for PDO.
 	 * @param   string  $bot_token        The unique token of the bot.
 	 * @param   string  $password         The password to start an interaction with the bot.
+	 * @param   string  $db_user          The database user.
+	 * @param   string  $db_password      The database password.
 	 *
 	 * @return Context|null The Context object or NULL on error.
 	 */
 	public static function create(
 		string $database_string = '',
 		string $bot_token = '',
-		string $password = ''
+		string $password = '',
+		string $db_user = '',
+		string $db_password = ''
 	): ?Context {
 		try {
-			$database = new PDO( $database_string );
+			$database = new PDO( $database_string, $db_user, $db_password );
 		}
 		catch ( PDOException $e ) {
 			return null;
