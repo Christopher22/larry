@@ -15,12 +15,18 @@ use PDOException;
 class Context {
 	private PDO $database;
 	private string $bot_token;
+	private string $password;
 
 	private static $is_registered = false;
 
-	private function __construct( PDO $database, string $bot_token ) {
+	private function __construct(
+		PDO $database,
+		string $bot_token,
+		string $password
+	) {
 		$this->database  = $database;
 		$this->bot_token = $bot_token;
+		$this->password  = $password;
 	}
 
 	/**
@@ -28,12 +34,14 @@ class Context {
 	 *
 	 * @param   string  $database_string  The database string used for PDO.
 	 * @param   string  $bot_token        The unique token of the bot.
+	 * @param   string  $password         The password to start an interaction with the bot.
 	 *
 	 * @return Context|null The Context object or NULL on error.
 	 */
 	public static function create(
 		string $database_string = '',
-		string $bot_token = ''
+		string $bot_token = '',
+		string $password = ''
 	): ?Context {
 		try {
 			$database = new PDO( $database_string );
@@ -42,7 +50,7 @@ class Context {
 			return null;
 		}
 
-		return new Context( $database, $bot_token );
+		return new Context( $database, $bot_token, $password );
 	}
 
 	/**
@@ -61,6 +69,17 @@ class Context {
 	 */
 	public function api_url( string $method ): string {
 		return "https://api.telegram.org/bot$this->bot_token/$method";
+	}
+
+	/**
+	 * Checks if a provided password is correct.
+	 *
+	 * @param   string  $password  The password
+	 *
+	 * @return bool TRUE, if the user entered the correct password.
+	 */
+	public function is_user_allowed( string $password ): bool {
+		return $this->password == $password;
 	}
 
 	/**

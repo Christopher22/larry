@@ -32,6 +32,15 @@ class Result {
 		return $this->success;
 	}
 
+	/**
+	 * Check if the result should be communicated to the user.
+	 *
+	 * @return bool TRUE, if it should be communicated.
+	 */
+	public function should_respond(): bool {
+		return ! empty( $this->message );
+	}
+
 	public function __toString(): string {
 		return $this->message;
 	}
