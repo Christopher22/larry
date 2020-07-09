@@ -14,21 +14,26 @@ use PDOException;
  */
 class Context {
 	private PDO $database;
+	private string $bot_token;
+
 	private static $is_registered = false;
 
-	private function __construct( PDO $database ) {
-		$this->database = $database;
+	private function __construct( PDO $database, string $bot_token ) {
+		$this->database  = $database;
+		$this->bot_token = $bot_token;
 	}
 
 	/**
 	 * Create a new context. Changing the default arguments allows to overwrite the default settings.
 	 *
 	 * @param   string  $database_string  The database string used for PDO.
+	 * @param   string  $bot_token        The unique token of the bot.
 	 *
 	 * @return Context|null The Context object or NULL on error.
 	 */
 	public static function create(
-		string $database_string = ''
+		string $database_string = '',
+		string $bot_token = ''
 	): ?Context {
 		try {
 			$database = new PDO( $database_string );
@@ -37,7 +42,7 @@ class Context {
 			return null;
 		}
 
-		return new Context( $database );
+		return new Context( $database, $bot_token );
 	}
 
 	/**
@@ -45,6 +50,17 @@ class Context {
 	 */
 	public function database(): PDO {
 		return $this->database;
+	}
+
+	/**
+	 * Return the URL to the Telegram API.
+	 *
+	 * @param $method string The name of the method.
+	 *
+	 * @return string The complete URL.
+	 */
+	public function api_url( string $method ): string {
+		return "https://api.telegram.org/bot$this->bot_token/$method";
 	}
 
 	/**
