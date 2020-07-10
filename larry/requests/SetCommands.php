@@ -26,7 +26,8 @@ class SetCommands extends Request {
 					'description' => $command->description(),
 				);
 			},
-			$commands ) );
+			$commands ),
+			JSON_UNESCAPED_SLASHES );
 
 		parent::__construct( $context,
 			'setMyCommands',

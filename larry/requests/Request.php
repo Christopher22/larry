@@ -30,7 +30,13 @@ class Request {
 	 *
 	 * @return bool TRUE if the was an success.
 	 */
-	function is_valid(): bool {
+	public function is_valid(): bool {
 		return $this->response['ok'] === true;
+	}
+
+	public function __toString(): string {
+		return $this->is_valid() ?
+			json_encode( $this->response['result'] )
+			: $this->response['description'];
 	}
 }
