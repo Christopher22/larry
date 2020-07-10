@@ -112,7 +112,7 @@ class TestMeeting extends TestCase {
 	}
 
 	/**
-	 * @depends test_query
+	 * @depends test_query_all
 	 */
 	public function test_update( PDO $database ) {
 		$users = User::load( $database, 1, 2 );
