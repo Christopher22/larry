@@ -3,6 +3,7 @@
 
 namespace larry\model;
 
+
 /**
  * The availability of an user at a specific meeting.
  *
@@ -35,5 +36,15 @@ class Availability {
 	 */
 	public function is_available(): ?bool {
 		return $this->is_available;
+	}
+
+	public function __toString(): string {
+		if ( $this->is_available === null ) {
+			return "{$this->user->name()}\t\t❓";
+		} elseif ( $this->is_available === false ) {
+			return "{$this->user->name()}\t\t❌";
+		} else {
+			return "{$this->user->name()}\t\t✔";
+		}
 	}
 }

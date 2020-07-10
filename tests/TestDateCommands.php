@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use larry\commands\Command;
 use larry\commands\Yes;
 use larry\commands\No;
+use larry\commands\Summary;
 use larry\Context;
 use larry\commands\DateCommand;
 use larry\model\Meeting;
@@ -29,7 +30,9 @@ class TestDateCommands extends TestCase {
 	 * @depends   test_context
 	 */
 	public function test_set( Context $context ): Context {
-		$user    = new User( $context->database(), 0, "John Doe" );
+		$user = new User( $context->database(), 0, "John Doe" );
+		// Create the user into the database to avoid foreign key problems
+		$this->assertTrue( $user->create() );
 		$message = new Message( Message::generate_json(
 			$user,
 			" /yes 22.04.1997"
@@ -77,6 +80,56 @@ class TestDateCommands extends TestCase {
 		$this->assertFalse( $meeting->availability( $user )->is_available() );
 
 		return $context;
+	}
+
+	/**
+	 * @depends   test_update
+	 */
+	public function test_summary_existing( Context $context ) {
+		$user    = new User( $context->database(), 0, "John Doe" );
+		$meeting = Meeting::from_date( $context->database(), 1997, 04, 22 );
+		$this->assertFalse( $meeting->availability( $user )->is_available() );
+		$this->assertCount( 1, $meeting->availabilities() );
+
+		$message = new Message( Message::generate_json(
+			$user,
+			" /summary {$meeting->date()->format('d.m.Y')}"
+		) );
+
+		$result = Command::parse( $context,
+			$message,
+			array(
+				new Summary(),
+			) );
+
+		$this->assertCount( 1, $result );
+		$this->assertTrue( $result[0]->is_successful() );
+		$this->assertEquals( "Meeting on {$meeting->date()->format('d.m.Y')}:\nJohn Doe\t\t❌",
+			strval( $result[0] ) );
+	}
+
+	/**
+	 * @depends   test_update
+	 */
+	public function test_summary_non_existing( Context $context ) {
+		$user    = new User( $context->database(), 0, "John Doe" );
+		$meeting = Meeting::from_date( $context->database(), 1998, 05, 23 );
+		$this->assertNull( $meeting->availability( $user )->is_available() );
+
+		$message = new Message( Message::generate_json(
+			$user,
+			" /summary {$meeting->date()->format('d.m.Y')}"
+		) );
+
+		$result = Command::parse( $context,
+			$message,
+			array(
+				new Summary(),
+			) );
+
+		$this->assertCount( 1, $result );
+		$this->assertTrue( $result[0]->is_successful() );
+		$this->assertEquals( Summary::NOBODY, strval( $result[0] ) );
 	}
 
 	public function test_parsing() {

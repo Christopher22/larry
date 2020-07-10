@@ -5,6 +5,7 @@ namespace larry;
 use larry\commands\No;
 use larry\commands\Start;
 use larry\commands\Yes;
+use larry\commands\Summary;
 use larry\commands\Command;
 use larry\requests\SendMessage;
 use larry\updates\Message;
@@ -36,7 +37,7 @@ $sender  = $message->sender( $context );
 $results = Command::parse(
 	$context,
 	$message,
-	$sender->exists() ? array( new Yes(), new No(), new Start() )
+	$sender->exists() ? array( new Yes(), new No(), new Start(), new Summary() )
 		: array( new Start() )
 );
 
