@@ -14,14 +14,14 @@ if ( $context === null ) {
 	exit( "Unable to create the context" );
 }
 
-if ( Meeting::prepare_database( $context->database() ) === false ) {
-	http_response_code( 500 );
-	exit( "Unable to create the Meeting database" );
-}
-
 if ( User::prepare_database( $context->database() ) === false ) {
 	http_response_code( 500 );
 	exit( "Unable to create the User database" );
+}
+
+if ( Meeting::prepare_database( $context->database() ) === false ) {
+	http_response_code( 500 );
+	exit( "Unable to create the Meeting database" );
 }
 
 $test_command = new GetMe( $context );
