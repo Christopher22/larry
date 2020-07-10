@@ -45,7 +45,7 @@ $results = Command::parse(
 foreach ( $results as $result ) {
 	if ( $result->should_respond() ) {
 		$message = new SendMessage( $context, $sender, strval( $result ) );
-		if ( $message->is_valid() ) {
+		if ( ! $message->is_valid() ) {
 			error_log( "Larry: Unable to send message" );
 		}
 	}
