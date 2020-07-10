@@ -97,9 +97,13 @@ class Context {
 			return true;
 		}
 		self::$is_registered = spl_autoload_register( function ( $class ) {
-			$file = dirname( __DIR__ )
-			        . DIRECTORY_SEPARATOR
-			        . str_replace( '\\', DIRECTORY_SEPARATOR, $class ) . '.php';
+			$namespace = explode( '\\', $class );
+			if ( count( $namespace ) <= 1 || $namespace[0] != 'larry' ) {
+				return false;
+			}
+
+			$namespace[0] = __DIR__;
+			$file         = implode( DIRECTORY_SEPARATOR, $namespace ) . '.php';
 			if ( file_exists( $file ) ) {
 				require $file;
 
