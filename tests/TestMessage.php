@@ -56,6 +56,7 @@ class TestMessage extends TestCase {
 			' d /c1 c2    dA /b /C3 1 '
 		) );
 		$this->assertTrue( $message->is_valid() );
+		$this->assertNull( $message->reply_to() );
 		$this->assertEquals( $example_user->id(),
 			$message->sender( $context )->id() );
 		$this->assertEquals( $example_user->name(),
@@ -94,5 +95,35 @@ class TestMessage extends TestCase {
 			new Result( '1', true ),
 		),
 			$result );
+	}
+
+	/**
+	 * @depends test_context
+	 */
+	public function test_reply( Context $context ) {
+		$user                  = new User( $context->database(), 0, "John" );
+		$original_message_text = 'Message 1';
+
+		$message1 = new Message( Message::generate_json(
+			$user,
+			$original_message_text,
+			1
+		) );
+		$this->assertTrue( $message1->is_valid() );
+
+		$message2 = new Message( Message::generate_json(
+			$user,
+			'Message 2',
+			2,
+			$message1
+		) );
+		$this->assertTrue( $message2->is_valid() );
+
+		$original_message = $message2->reply_to();
+		$this->assertNotNull( $original_message );
+		$this->assertNull( $original_message->reply_to() );
+		$this->assertEquals( $original_message_text,
+			strval( $original_message ) );
+		$this->assertEquals( $original_message->sender( $context ), $user );
 	}
 }

@@ -15,9 +15,9 @@ class Message extends Update {
 	/**
 	 * Creates a new message.
 	 *
-	 * @param   string  $update  The JSON of the update.
+	 * @param   string|array  $update  The JSON of the update.
 	 */
-	public function __construct( string $update ) {
+	public function __construct( $update ) {
 		parent::__construct( $update, 'message' );
 		if ( $this->is_valid()
 		     && ( ! array_key_exists( 'from', $this->content )
@@ -33,32 +33,54 @@ class Message extends Update {
 	/**
 	 * Creates the corresponding JSON for a message, mainly for testing reasons.
 	 *
-	 * @param   User    $user     The user of interest
-	 * @param   string  $message  The message.
-	 * @param   int     $id       The id of the message.
+	 * @param   User          $user      The user of interest
+	 * @param   string        $message   The message.
+	 * @param   int           $id        The id of the message
+	 * @param   Message|null  $reply_to  Specifies the message the newly created one is a response to.
 	 *
 	 * @return string The message.
 	 */
 	public static function generate_json(
 		User $user,
 		string $message,
-		int $id = 0
+		int $id = 0,
+		?Message $reply_to = null
 	): string {
 		return json_encode( array(
 			'update_id' => $id,
-			'message'   => array(
-				'from' => array(
+			'message'   => [
+				'from'             => [
 					'id'         => $user->id(),
 					'first_name' => $user->name(),
-				),
-				'text' => $message,
-				'chat' => array(
+				],
+				'text'             => $message,
+				'chat'             => [
 					'id' => $user->chat_id(),
+				],
+				'reply_to_message' => ( $reply_to !== null
+				                        && $reply_to->is_valid()
+					? $reply_to->content
+					: null
 				),
-			),
+			],
 		) );
 	}
 
+	/**
+	 * Query the message which the current message is a reply to.
+	 *
+	 * @return Message|null The message or NULL if it does not exists or is invalid.
+	 */
+	public function reply_to(): ?Message {
+		if ( ! key_exists( 'reply_to_message', $this->content )
+		     || $this->content['reply_to_message'] === null ) {
+			return null;
+		}
+
+		$inner_message = new Message( $this->content['reply_to_message'] );
+
+		return $inner_message->is_valid() ? $inner_message : null;
+	}
 
 	/**
 	 * Query the sender of the message.
@@ -94,5 +116,11 @@ class Message extends Update {
 		}
 
 		return $tokens;
+	}
+
+	public function __toString(): string {
+		return key_exists( 'text', $this->content )
+			? $this->content['text']
+			: '';
 	}
 }
