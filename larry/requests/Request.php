@@ -18,7 +18,7 @@ class Request {
 		if ( $result === false ) {
 			$this->response = array( 'ok' => false );
 		} else {
-			$this->response = json_decode( $result );
+			$this->response = json_decode( $result, true );
 			if ( ! is_array( $this->response ) ) {
 				$this->response = array( 'ok' => false );
 			}
