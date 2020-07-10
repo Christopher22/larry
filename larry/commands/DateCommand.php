@@ -50,10 +50,14 @@ abstract class DateCommand extends Command {
 		Message $message,
 		string ...$parameters
 	): Result {
-
-		$date = count( $parameters ) === 1
-			? self::parse_date( $parameters[0] )
-			: null;
+		// If there is no argument, try to parse the former message instead
+		if ( count( $parameters ) === 0 ) {
+			$reply_to = $message->reply_to();
+			$date     = $reply_to !== null
+				? self::parse_date( strval( $reply_to ) ) : null;
+		} else {
+			$date = self::parse_date( $parameters[0] );
+		}
 
 		if ( $date === null ) {
 			return new Result(

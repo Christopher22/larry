@@ -132,6 +132,39 @@ class TestDateCommands extends TestCase {
 		$this->assertEquals( Summary::NOBODY, strval( $result[0] ) );
 	}
 
+	/**
+	 * Checks the usage of a reply as argument.
+	 *
+	 * @depends   test_update
+	 */
+	public function test_reply( Context $context ) {
+		$user             = new User( $context->database(), 0, "John Doe" );
+		$original_message = new Message( Message::generate_json(
+			$user,
+			"Do you like to build a snowman? 22.04.1997 Cool date!"
+		) );
+		$message          = new Message( Message::generate_json(
+			$user,
+			"/yes",
+			1,
+			$original_message
+		) );
+
+		$meeting = Meeting::from_date( $context->database(), 1997, 04, 22 );
+		$this->assertFalse( $meeting->availability( $user )->is_available() );
+
+		$result = Command::parse( $context,
+			$message,
+			array(
+				new Yes(),
+				new No(),
+			) );
+
+		$this->assertCount( 1, $result );
+		$this->assertTrue( $result[0]->is_successful() );
+		$this->assertTrue( $meeting->availability( $user )->is_available() );
+	}
+
 	public function test_parsing() {
 		$current_year = date( 'Y' );
 		$ground_truth = DateTimeImmutable::createFromFormat( 'd.m.Y H:i:s',
