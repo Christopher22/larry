@@ -14,13 +14,25 @@ class Request {
 			$url        = "$url?$parameters";
 		}
 
-		$result = file_get_contents( $url, false );
+		// This contexts allows the parsing of the body even if the request status code was non-200.
+		$context = stream_context_create( array(
+			'http' => array(
+				'ignore_errors' => true,
+			),
+		) );
+		$result  = @file_get_contents( $url, false, $context );
 		if ( $result === false ) {
-			$this->response = array( 'ok' => false );
+			$this->response = array(
+				'ok'          => false,
+				'description' => 'Connection to API failed',
+			);
 		} else {
 			$this->response = json_decode( $result, true );
 			if ( ! is_array( $this->response ) ) {
-				$this->response = array( 'ok' => false );
+				$this->response = array(
+					'ok'          => false,
+					'description' => 'Not an array',
+				);
 			}
 		}
 	}
