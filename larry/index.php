@@ -7,7 +7,6 @@ use larry\commands\Start;
 use larry\commands\Yes;
 use larry\commands\Summary;
 use larry\commands\Command;
-use larry\requests\SendMessage;
 use larry\updates\Message;
 
 require "Context.php";
@@ -43,10 +42,7 @@ $results = Command::parse(
 
 // Report all the results
 foreach ( $results as $result ) {
-	if ( $result->should_respond() ) {
-		$message = new SendMessage( $context, $sender, strval( $result ) );
-		if ( ! $message->is_valid() ) {
-			error_log( "Larry: Unable to send message" );
-		}
+	if ( ! $result->send( $context, $sender ) ) {
+		error_log( "Larry: Unable to send message" );
 	}
 }
