@@ -2,6 +2,7 @@
 
 namespace larry;
 
+use larry\commands\Ask;
 use larry\commands\No;
 use larry\commands\Start;
 use larry\commands\Yes;
@@ -32,11 +33,17 @@ if ( $context === null ) {
 }
 
 // Parse the commands in the message
-$sender  = $message->sender( $context );
+$sender = $message->sender( $context );
 $results = Command::parse(
 	$context,
 	$message,
-	$sender->exists() ? array( new Yes(), new No(), new Start(), new Summary() )
+	$sender->exists() ? array(
+		new Yes(),
+		new No(),
+		new Start(),
+		new Summary(),
+		new Ask(),
+	)
 		: array( new Start() )
 );
 

@@ -1,16 +1,20 @@
 <?php
 
+
 use PHPUnit\Framework\TestCase;
 
+use larry\Context;
+use larry\updates\Message;
 use larry\commands\Command;
 use larry\commands\Yes;
 use larry\commands\No;
-use larry\commands\Summary;
-use larry\Context;
 use larry\commands\DateCommand;
+use larry\commands\Ask;
+use larry\commands\Result;
+use larry\commands\Summary;
 use larry\model\Meeting;
 use larry\model\User;
-use larry\updates\Message;
+use larry\model\Availability;
 
 
 class TestDateCommands extends TestCase {
@@ -162,6 +166,67 @@ class TestDateCommands extends TestCase {
 		$this->assertTrue( $result[0]->is_successful() );
 		$this->assertTrue( $meeting->availability( $user )->is_available() );
 	}
+
+	/**
+	 * @depends   test_context
+	 */
+	public function test_ask( Context $context ) {
+		$user1   = new User( $context->database(), 42, "Sender" );
+		$user2   = new User( $context->database(), 43, "Receiver" );
+		$user3   = new User( $context->database(), 44, "Receiver2" );
+		$meeting = Meeting::from_date( $context->database(), 2012, 1, 1 );
+
+		$this->assertTrue( $user1->create() );
+		$this->assertTrue( $user2->create() );
+		$this->assertTrue( $user3->create() );
+		$this->assertTrue( $meeting->set_availability( new Availability( $user3,
+			true ) ) );
+
+		$message = new Message( Message::generate_json(
+			$user1,
+			"/ask 1.01.2012",
+			0,
+		) );
+
+		// Overwrite the Result sending implementation
+		$sent_messages = array();
+		Result::overwrite_send( function ( ...$params ) use (
+			&$sent_messages
+		) {
+			$sent_messages[] = strval( $params[0] );
+
+			return true;
+		} );
+
+		$result = Command::parse( $context,
+			$message,
+			array(
+				new Yes(),
+				new Ask(),
+			) );
+
+		$this->assertCount( 1, $result );
+		$this->assertCount( 3, $sent_messages );
+		$this->assertTrue( $result[0]->is_successful() );
+		$this->assertEquals(
+			sprintf(
+				Ask::CONFIRMATION,
+				"- John Doe\n- Sender\n- Receiver",
+				"01.01.2012"
+			),
+			strval( $result[0] )
+		);
+		$this->assertEquals(
+			sprintf(
+				Ask::QUESTION,
+				"Receiver",
+				"Sender",
+				"01.01.2012"
+			),
+			$sent_messages[2]
+		);
+	}
+
 
 	public function test_parsing() {
 		$current_year = date( 'Y' );
