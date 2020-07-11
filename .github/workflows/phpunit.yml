@@ -35,4 +35,4 @@ jobs:
     - name: PHPUnit (php-actions)
       uses: php-actions/phpunit@v1
       with:
-        config: phpunit.xml
+        config: 'phpunit.xml'
