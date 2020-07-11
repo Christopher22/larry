@@ -1,0 +1,11 @@
+<phpunit colors="true" bootstrap="larry/Context.php">
+    <testsuites>
+        <testsuite name="larry">
+            <file>tests/TestDateCommands.php</file>
+            <file>tests/TestMeeting.php</file>
+            <file>tests/TestMessage.php</file>
+            <file>tests/TestStart.php</file>
+            <file>tests/TestUser.php</file>
+        </testsuite>
+    </testsuites>
+</phpunit>

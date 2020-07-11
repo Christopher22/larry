@@ -1,7 +1,5 @@
 <?php
 
-require "../larry/Context.php";
-
 use PHPUnit\Framework\TestCase;
 
 use larry\model\User;
