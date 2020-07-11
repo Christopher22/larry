@@ -130,5 +130,26 @@ class TestMeeting extends TestCase {
 		$this->assertFalse( $availabilities2[0]->is_available() );
 		$this->assertTrue( $availabilities2[1]->is_available() );
 		$this->assertCount( 0, $date3->availabilities() );
+
+		return $database;
+	}
+
+	/**
+	 * @depends test_update
+	 */
+	public function test_missing( PDO $database ) {
+		// Create a new user
+		$user3 = new User( $database, 3, "Max Mustermann" );
+		$this->assertTrue( $user3->create() );
+
+		// Check only the new user has no response on date 1
+		$date1         = Meeting::from_date( $database, 1997, 4, 22 );
+		$unknown_date1 = $date1->unknown_availabilities();
+		$this->assertCount( 1, $unknown_date1 );
+		$this->assertEquals( 3, $unknown_date1[0]->id() );
+
+		$date3         = Meeting::from_date( $database, 1997, 5, 1 );
+		$unknown_date3 = $date3->unknown_availabilities();
+		$this->assertCount( 3, $unknown_date3 );
 	}
 }

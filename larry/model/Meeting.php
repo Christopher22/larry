@@ -179,6 +179,43 @@ class Meeting {
 	}
 
 	/**
+	 * Returns all the user which have not indicated if they are available.
+	 *
+	 * @return User[] The users without a response.
+	 */
+	public function unknown_availabilities(): array {
+		$statement = $this->database->prepare( sprintf(
+			"SELECT id, user_name, chat_id FROM %s WHERE NOT EXISTS (SELECT is_available FROM %s WHERE %s.user_id = %s.id and %s.id = ?) ORDER BY %s.id ASC ",
+			User::TABLE_NAME,
+			self::TABLE_NAME,
+			self::TABLE_NAME,
+			User::TABLE_NAME,
+			self::TABLE_NAME,
+			User::TABLE_NAME
+		) );
+
+		// Check if preparation and execution was successful
+		if ( $statement === false
+		     || ! $statement->bindValue( 1,
+				$this->date->getTimestamp(),
+				PDO::PARAM_INT )
+		     || ! $statement->execute() ) {
+			return array();
+		}
+
+		$database = $this->database;
+
+		return array_map( function ( $user ) use ( $database ) {
+			return new User( $database,
+				$user['id'],
+				$user['user_name'],
+				$user['chat_id'] );
+		},
+			$statement->fetchAll( PDO::FETCH_ASSOC )
+		);
+	}
+
+	/**
 	 * Load all meetings from the database in ascending order.s
 	 *
 	 * @param   PDO  $database  The database.
