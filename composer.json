@@ -1,9 +1,27 @@
 {
-  "require-dev": {
-    "phpunit/phpunit": "9.*"
-  },
+  "name": "cgundler/larry",
+  "description": "A Telegram bot for managing meetings",
+  "authors": [
+    {
+      "name": "Christopher Gundler",
+      "email": "christopher@gundler.de"
+    }
+  ],
+  "homepage": "https://github.com/Christopher22/larry",
+  "license": "AGPL-3.0-or-later",
+  "minimum-stability": "dev",
   "require": {
+    "php": ">=7.4",
     "ext-pdo": "*",
     "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*",
+    "ext-pdo_sqlite": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "larry\\": "larry/"
+    }
   }
 }
