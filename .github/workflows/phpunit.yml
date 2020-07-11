@@ -13,7 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
+    - uses: php-actions/composer@v1
+    - uses: php-actions/phpunit@v1
+      
     - name: Validate composer.json and composer.lock
       run: composer validate
       
@@ -33,4 +35,4 @@ jobs:
     - name: PHPUnit (php-actions)
       uses: php-actions/phpunit@v1
       with:
-        config: 'phpunit.xml'
+        config: phpunit.xml
