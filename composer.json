@@ -16,7 +16,7 @@
     "ext-json": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "*",
+    "phpunit/phpunit": "9.*",
     "ext-pdo_sqlite": "*"
   },
   "autoload": {

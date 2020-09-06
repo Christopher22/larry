@@ -1,4 +1,4 @@
-name: PHP Composer and PHPUnit
+name: PHP Unit Tests
 
 on:
   push:
@@ -13,8 +13,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: php-actions/composer@v1
-    - uses: php-actions/phpunit@v1
       
     - name: Validate composer.json and composer.lock
       run: composer validate
@@ -32,7 +30,7 @@ jobs:
       if: steps.composer-cache.outputs.cache-hit != 'true'
       run: composer install --prefer-dist --no-progress --no-suggest
 
-    - name: PHPUnit (php-actions)
-      uses: php-actions/phpunit@v1
+    - name: Run unit tests
+      uses: php-actions/phpunit@v9
       with:
         config: 'phpunit.xml'
