@@ -97,6 +97,20 @@ class TestMeeting extends TestCase {
 	}
 
 	/**
+	 * @depends test_query_all
+	 */
+	public function test_query_all_with_unknown( PDO $database ) {
+		$availabilities = ( Meeting::from_date( $database,
+			1997,
+			5,
+			1 ) )->availabilities( true );
+
+		$this->assertCount( 2, $availabilities );
+		$this->assertFalse( $availabilities[0]->is_available() );
+		$this->assertNull( $availabilities[1]->is_available() );
+	}
+
+	/**
 	 * @depends test_add
 	 */
 	public function test_query_single( PDO $database ) {

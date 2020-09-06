@@ -136,11 +136,13 @@ class Meeting {
 	}
 
 	/**
-	 * Return all the known availabilities ordered by the ids of the users.
+	 * Return availabilities ordered by the ids of the users.
 	 *
-	 * @return Availability[] An array of known(!) availabilities.
+	 * @param   bool  $include_unknown  Include the users without information.
+	 *
+	 * @return Availability[] An array of availabilities.
 	 */
-	public function availabilities(): array {
+	public function availabilities( bool $include_unknown = false ): array {
 		$raw_users = array();
 		$statement = $this->database->prepare( sprintf(
 			'SELECT user_id, is_available FROM %s WHERE id = ? ORDER BY user_id ASC',
@@ -166,15 +168,28 @@ class Meeting {
 			array_column( $raw_users, 'is_available' )
 		);
 
+		// Select all users or only the queried ones as selection
+		$user_selection = $include_unknown ? User::load_all( $this->database )
+			: User::load( $this->database, ...array_keys( $raw_users ) );
+
 		// Map each user to its availability
 		return array_map(
 			function ( $user ) use ( $raw_users ) {
+				# Map the raw integers or missing information to proper values
+				$raw_availability = $raw_users[ $user->id() ] ?? null;
+				if ( ! is_null( $raw_availability )
+				     && $raw_availability == 0 ) {
+					$raw_availability = false;
+				} elseif ( $raw_availability == 1 ) {
+					$raw_availability = true;
+				}
+
 				return new Availability(
 					$user,
-					$raw_users[ $user->id() ] == 1
+					$raw_availability
 				);
 			},
-			User::load( $this->database, ...array_keys( $raw_users ) )
+			$user_selection
 		);
 	}
 

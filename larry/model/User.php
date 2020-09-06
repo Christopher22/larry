@@ -132,6 +132,34 @@ class User {
 	}
 
 	/**
+	 * Load all users from the database sorted by their ID.
+	 *
+	 * @param   PDO  $database  The database.
+	 *
+	 * @return User[] All existing users in the database.
+	 */
+	public static function load_all( PDO $database ): array {
+		$result = array();
+		$query  = $database->prepare(
+			sprintf( 'SELECT id, user_name, chat_id FROM %s ORDER BY id ASC',
+				self::TABLE_NAME )
+		);
+		if ( $query === false ) {
+			return $result;
+		}
+
+		$query->execute();
+		foreach ( $query->fetchAll( PDO::FETCH_ASSOC ) as $raw_user ) {
+			$result[] = new User( $database,
+				$raw_user["id"],
+				$raw_user["user_name"],
+				$raw_user["chat_id"] );
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Create the tables suitable for managing users.
 	 *
 	 * @param   PDO  $database  The database.

@@ -34,7 +34,7 @@ class Summary extends DateCommand {
 		DateTimeImmutable $date
 	): Result {
 		$meeting        = new Meeting( $context->database(), $date );
-		$availabilities = $meeting->availabilities();
+		$availabilities = $meeting->availabilities( true );
 		if ( count( $availabilities ) > 0 ) {
 			array_unshift( $availabilities,
 				"Meeting on {$date->format('d.m.Y')}:" );

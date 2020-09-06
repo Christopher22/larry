@@ -50,4 +50,16 @@ class TestUser extends TestCase {
 		$this->assertEquals( "Marian Muster", $data[1]->name() );
 		$this->assertEquals( 43, $data[1]->chat_id() );
 	}
+
+	/**
+	 * @depends test_add_user
+	 */
+	public function test_load_all( PDO $database ) {
+		$data = User::load_all( $database );
+		$this->assertCount( 2, $data );
+		$this->assertEquals( "Max Muster", $data[0]->name() );
+		$this->assertEquals( 42, $data[0]->chat_id() );
+		$this->assertEquals( "Marian Muster", $data[1]->name() );
+		$this->assertEquals( 43, $data[1]->chat_id() );
+	}
 }
