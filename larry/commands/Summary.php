@@ -35,7 +35,14 @@ class Summary extends DateCommand {
 	): Result {
 		$meeting        = new Meeting( $context->database(), $date );
 		$availabilities = $meeting->availabilities( true );
-		if ( count( $availabilities ) > 0 ) {
+
+		// Count numbers of known responses
+		$num_known = 0;
+		foreach ( $availabilities as $availability ) {
+			$num_known += $availability->is_available() !== null ? 1 : 0;
+		}
+
+		if ( $num_known > 0 ) {
 			array_unshift( $availabilities,
 				"Meeting on {$date->format('d.m.Y')}:" );
 			$result = implode( "\n", $availabilities );
