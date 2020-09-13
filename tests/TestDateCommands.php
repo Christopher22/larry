@@ -14,7 +14,6 @@ use larry\commands\Result;
 use larry\commands\Summary;
 use larry\model\Meeting;
 use larry\model\User;
-use larry\model\Availability;
 
 
 class TestDateCommands extends TestCase {
@@ -61,11 +60,24 @@ class TestDateCommands extends TestCase {
 	 * @depends   test_set
 	 */
 	public function test_update( Context $context ): Context {
-		$user    = new User( $context->database(), 0, "John Doe" );
+		$user  = new User( $context->database(), 0, "John Doe" );
+		$user2 = new User( $context->database(), 1, "Jane Doe" );
+		$this->assertTrue( $user2->create() );
+
 		$message = new Message( Message::generate_json(
 			$user,
 			" /no 22.04.1997"
 		) );
+
+		// Overwrite the Result sending implementation
+		$sent_messages = array();
+		Result::overwrite_send( function ( ...$params ) use (
+			&$sent_messages
+		) {
+			$sent_messages[] = strval( $params[0] );
+
+			return true;
+		} );
 
 		$meeting = Meeting::from_date( $context->database(), 1997, 04, 22 );
 		$this->assertTrue( $meeting->availability( $user )->is_available() );
@@ -80,6 +92,17 @@ class TestDateCommands extends TestCase {
 		$this->assertCount( 1, $result );
 		$this->assertTrue( $result[0]->is_successful() );
 		$this->assertFalse( $meeting->availability( $user )->is_available() );
+
+		// Ensure a notification is send to the others
+		$this->assertCount( 1, $sent_messages );
+		$this->assertEquals(
+			sprintf(
+				No::CHANGE_NOTIFICATION,
+				$user->name(),
+				"22.04.1997"
+			),
+			strval( $sent_messages[0] )
+		);
 
 		return $context;
 	}
@@ -106,7 +129,7 @@ class TestDateCommands extends TestCase {
 
 		$this->assertCount( 1, $result );
 		$this->assertTrue( $result[0]->is_successful() );
-		$this->assertEquals( "Meeting on {$meeting->date()->format('d.m.Y')}:\nJohn Doe\t\t❌",
+		$this->assertEquals( "Meeting on {$meeting->date()->format('d.m.Y')}:\nJohn Doe\t\t❌\nJane Doe\t\t❓",
 			strval( $result[0] ) );
 	}
 
@@ -168,23 +191,15 @@ class TestDateCommands extends TestCase {
 	}
 
 	/**
-	 * @depends   test_context
+	 * @depends   test_update
 	 */
 	public function test_ask( Context $context ) {
-		$user1   = new User( $context->database(), 42, "Sender" );
-		$user2   = new User( $context->database(), 43, "Receiver" );
-		$user3   = new User( $context->database(), 44, "Receiver2" );
-		$meeting = Meeting::from_date( $context->database(), 2012, 1, 1 );
+		$new_user = new User( $context->database(), 42, "Sender" );
 
-		$this->assertTrue( $user1->create() );
-		$this->assertTrue( $user2->create() );
-		$this->assertTrue( $user3->create() );
-		$this->assertTrue( $meeting->set_availability( new Availability( $user3,
-			true ) ) );
-
+		$this->assertTrue( $new_user->create() );
 		$message = new Message( Message::generate_json(
-			$user1,
-			"/ask 1.01.2012",
+			$new_user,
+			"/ask 22.04.1997",
 			0,
 		) );
 
@@ -206,24 +221,33 @@ class TestDateCommands extends TestCase {
 			) );
 
 		$this->assertCount( 1, $result );
-		$this->assertCount( 3, $sent_messages );
+		$this->assertCount( 2, $sent_messages );
 		$this->assertTrue( $result[0]->is_successful() );
 		$this->assertEquals(
 			sprintf(
 				Ask::CONFIRMATION,
-				"- John Doe\n- Sender\n- Receiver",
-				"01.01.2012"
+				"- Jane Doe\n- Sender",
+				"22.04.1997"
 			),
 			strval( $result[0] )
 		);
 		$this->assertEquals(
 			sprintf(
 				Ask::QUESTION,
-				"Receiver",
+				"Jane Doe",
 				"Sender",
-				"01.01.2012"
+				"22.04.1997"
 			),
-			$sent_messages[2]
+			$sent_messages[0]
+		);
+		$this->assertEquals(
+			sprintf(
+				Ask::QUESTION,
+				"Sender",
+				"Sender",
+				"22.04.1997"
+			),
+			$sent_messages[1]
 		);
 	}
 
