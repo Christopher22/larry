@@ -6,6 +6,7 @@
             <file>tests/TestMessage.php</file>
             <file>tests/TestStart.php</file>
             <file>tests/TestUser.php</file>
+            <file>tests/TestApi.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

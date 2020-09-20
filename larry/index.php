@@ -24,7 +24,7 @@ if ( ! $message->is_valid() ) {
 	exit();
 }
 
-// Create the context and delete if invalid
+// Create the context and fail if it is invalid
 $context = Context::create();
 if ( $context === null ) {
 	http_response_code( 500 );
@@ -33,7 +33,7 @@ if ( $context === null ) {
 }
 
 // Parse the commands in the message
-$sender = $message->sender( $context );
+$sender  = $message->sender( $context );
 $results = Command::parse(
 	$context,
 	$message,
