@@ -87,7 +87,7 @@ class Response {
 		if ( count( $this->response ) !== 0 ) {
 			$content = json_encode( $this->response );
 			header( "Content-Type: application/json" );
-			fwrite( STDOUT, $content );
+			print( $content );
 		}
 	}
 }
