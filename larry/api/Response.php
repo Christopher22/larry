@@ -12,6 +12,7 @@ namespace larry\api;
 class Response {
 	private int $code;
 	private array $response;
+	private array $headers;
 
 	/**
 	 * Create a new response with a status code and an optional payload.
@@ -22,6 +23,34 @@ class Response {
 	public function __construct( int $status_code, array $response = array() ) {
 		$this->code     = $status_code;
 		$this->response = $response;
+		$this->headers  = array();
+	}
+
+	/**
+	 * Add a header which is send with the response.
+	 *
+	 * @param   string  $header  The HTTP header.
+	 */
+	public function add_header( string $header ) {
+		$this->headers[] = $header;
+	}
+
+	/**
+	 * Return a array of headers send to the client.
+	 *
+	 * @return array Headers.
+	 */
+	public function headers(): array {
+		return $this->headers;
+	}
+
+	/**
+	 * Return the status code.
+	 *
+	 * @return int The HTTP status code.
+	 */
+	public function status(): int {
+		return $this->code;
 	}
 
 	/**
@@ -46,7 +75,15 @@ class Response {
 	 * Send the response to the client.
 	 */
 	public function send() {
+		// Set the HTTP response code
 		http_response_code( $this->code );
+
+		// Send all the headers
+		foreach ( $this->headers as $header ) {
+			header( $header );
+		}
+
+		// Send the serialized payload, iff available
 		if ( count( $this->response ) !== 0 ) {
 			$content = json_encode( $this->response );
 			header( "Content-Type: application/json" );

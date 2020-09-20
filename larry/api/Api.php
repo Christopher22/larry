@@ -61,7 +61,10 @@ abstract class Api {
 	public static function parse( Request $request, array $apis ): Response {
 		// Check the password of the request
 		if ( ! $request->is_allowed() ) {
-			return new Response( 400 );
+			$response = new Response( 401 );
+			$response->add_header( 'WWW-Authenticate: Basic realm="Please enter a valid API key."' );
+
+			return $response;
 		}
 
 		// Extract the API of interest
