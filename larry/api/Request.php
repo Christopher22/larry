@@ -131,7 +131,7 @@ class Request {
 	 * @return bool True, if the request is allowed.
 	 */
 	public function is_allowed(): bool {
-		$password_header = $this->get( INPUT_SERVER, "HTTP_Authorization" );
+		$password_header = $this->get( INPUT_SERVER, "HTTP_AUTHORIZATION" );
 		if ( is_null( $password_header ) or
 		     preg_match( '/\\s*Basic\\s+([A-Za-z0-9\\+\\\\=]+)/is',
 			     $password_header,

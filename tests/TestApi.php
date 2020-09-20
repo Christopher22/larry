@@ -38,7 +38,7 @@ class TestApi extends TestCase {
 		$this->assertEquals( 1,
 			$request->filter( INPUT_POST, 'post_param', FILTER_VALIDATE_INT ) );
 		$this->assertEquals( self::AUTH,
-			$request->get( INPUT_SERVER, 'HTTP_Authorization' ) );
+			$request->get( INPUT_SERVER, 'HTTP_AUTHORIZATION' ) );
 
 		return $request;
 	}
@@ -64,7 +64,7 @@ class TestApi extends TestCase {
 			$request->context(),
 			array(),
 			array(),
-			array( 'HTTP_Authorization' => ' Basic Y2hyaXN0b3BoZXI6ZG9l' )
+			array( 'HTTP_AUTHORIZATION' => ' Basic Y2hyaXN0b3BoZXI6ZG9l' )
 		);
 		$this->assertFalse( $request3->is_allowed() );
 	}
