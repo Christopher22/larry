@@ -18,7 +18,7 @@ class Meeting {
 	private PDO $database;
 
 	/**
-	 * Create a new meeting without any attending users.
+	 * Create a new meeting.
 	 *
 	 * @param   PDO                $database    The database.
 	 * @param   DateTimeImmutable  $date        The date of the meeting.
@@ -34,14 +34,14 @@ class Meeting {
 	}
 
 	/**
-	 * A shortcut for creating a meeting at a specific date.
+	 * A utility function for creating a meeting at a specific date.
 	 *
 	 * @param   PDO  $database  The database.
 	 * @param   int  $year      The year of the meeting.
 	 * @param   int  $month     The month of the meeting.
 	 * @param   int  $day       The day of the meeting.
 	 *
-	 * @return Meeting The created meeting without attending users.
+	 * @return Meeting The created meeting.
 	 */
 	public static function from_date(
 		PDO $database,
@@ -52,6 +52,25 @@ class Meeting {
 		$date = ( new DateTimeImmutable() )->setDate( $year, $month, $day );
 
 		return new Meeting( $database, $date, true );
+	}
+
+	/**
+	 * A utility function for creating a meeting at a specific date given a timestamp.
+	 *
+	 * @param   PDO   $database    The database.
+	 * @param   int   $timestamp   The UNIX timestamp.
+	 * @param   bool  $reset_time  If TRUE, the time component is ignored.
+	 *
+	 * @return Meeting The created meeting.
+	 */
+	public static function from_timestamp(
+		PDO $database,
+		int $timestamp,
+		bool $reset_time = true
+	) {
+		$date = ( new DateTimeImmutable() )->setTimestamp( $timestamp );
+
+		return new Meeting( $database, $date, $reset_time );
 	}
 
 	/**
@@ -233,16 +252,25 @@ class Meeting {
 	/**
 	 * Load all meetings from the database in ascending order.s
 	 *
-	 * @param   PDO  $database  The database.
+	 * @param   PDO      $database       The database.
+	 * @param   Meeting  $first_meeting  The first meeting which should be included.
 	 *
 	 * @return Meeting[] Sorted meetings in the database.
 	 */
-	public static function load_all( PDO $database ): array {
+	public static function load_all(
+		PDO $database,
+		?Meeting $first_meeting = null
+	): array {
 		$statement = $database->query( sprintf(
-			'SELECT DISTINCT id FROM %s ORDER BY id ASC',
+			'SELECT DISTINCT id FROM %s WHERE id >= ? ORDER BY id ASC',
 			self::TABLE_NAME
 		) );
-		if ( $statement === false ) {
+		if ( $statement === false
+		     || ! $statement->bindValue( 1,
+				is_null( $first_meeting ) ? 0
+					: $first_meeting->date->getTimestamp(),
+				PDO::PARAM_INT )
+		     || ! $statement->execute() ) {
 			return array();
 		}
 

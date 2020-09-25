@@ -68,6 +68,21 @@ class TestMeeting extends TestCase {
 	/**
 	 * @depends test_add
 	 */
+	public function test_loading_all_with_min( PDO $database ) {
+		$first_meeting = Meeting::from_date( $database, 1997, 04, 23 );
+		$dates         = Meeting::load_all( $database, $first_meeting );
+		$this->assertCount( 2, $dates );
+
+		// The order of dates is ascending
+		$this->assertEquals( '1997-04-29',
+			$dates[0]->date()->format( 'Y-m-d' ) );
+		$this->assertEquals( '1997-05-01',
+			$dates[1]->date()->format( 'Y-m-d' ) );
+	}
+
+	/**
+	 * @depends test_add
+	 */
 	public function test_query_all( PDO $database ) {
 		$availabilities1 = ( Meeting::from_date( $database,
 			1997,
