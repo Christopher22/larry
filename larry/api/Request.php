@@ -100,7 +100,29 @@ class Request {
 				$this->get_args[ $name ] = $value;
 				break;
 			case INPUT_POST:
-				$this->post_args[ $name ] = null;
+				$this->post_args[ $name ] = $value;
+				break;
+			default:
+				die( "Unsupported type of argument" );
+		}
+	}
+
+	/**
+	 * Remove a variable from the existing request.
+	 *
+	 * @param   int     $type  The type of variables. Currently: INPUT_SERVER, INPUT_GET, INPUT_POST
+	 * @param   string  $name  The name of the variable.
+	 */
+	public function remove( int $type, string $name ) {
+		switch ( $type ) {
+			case INPUT_SERVER:
+				unset( $this->server_args[ $name ] );
+				break;
+			case INPUT_GET:
+				unset( $this->get_args[ $name ] );
+				break;
+			case INPUT_POST:
+				unset( $this->post_args[ $name ] );
 				break;
 			default:
 				die( "Unsupported type of argument" );
