@@ -53,7 +53,7 @@ class Users extends Api {
 		string $key,
 		$value
 	): Response {
-		return new Response( 501 );
+		return Response::from_error( 501, 'Updating users is not supported' );
 	}
 
 

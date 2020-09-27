@@ -10,6 +10,8 @@ namespace larry\api;
  * @package larry\api
  */
 class Response {
+	public const ERROR_KEY = 'error';
+
 	private int $code;
 	private array $response;
 	private array $headers;
@@ -24,6 +26,24 @@ class Response {
 		$this->code     = $status_code;
 		$this->response = $response;
 		$this->headers  = array();
+	}
+
+	/**
+	 * Create a response with an error code and a detailed message.
+	 *
+	 * @param   int     $status_code    The HTTP status code.
+	 * @param   string  $error_message  The error message.
+	 *
+	 * @return Response The resulting response.s
+	 */
+	public static function from_error(
+		int $status_code,
+		string $error_message
+	): Response {
+		return new Response(
+			$status_code,
+			array( self::ERROR_KEY => $error_message )
+		);
 	}
 
 	/**
@@ -89,5 +109,9 @@ class Response {
 			header( "Content-Type: application/json" );
 			print( $content );
 		}
+	}
+
+	public function __toString(): string {
+		return $this->response[ self::ERROR_KEY ] ?? '<No error>';
 	}
 }

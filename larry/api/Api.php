@@ -3,12 +3,17 @@
 
 namespace larry\api;
 
+use JsonException;
+
 /**
  * A public API to access Larry.
  *
  * @package larry\api
  */
 abstract class Api {
+	public const KEY_NAME = 'attribute';
+	public const VALUE_NAME = 'value';
+
 	/**
 	 * The entry point used to access the API.
 	 *
@@ -61,29 +66,30 @@ abstract class Api {
 	public static function parse( Request $request, array $apis ): Response {
 		// Check the password of the request
 		if ( ! $request->is_allowed() ) {
-			$response = new Response( 401 );
+			$response = Response::from_error( 401, 'Authentication invalid' );
 			$response->add_header( 'WWW-Authenticate: Basic realm="Please enter a valid API key."' );
 
 			return $response;
 		}
 
 		// Extract the API of interest
-		$api_name = $request->get( INPUT_GET, "api" );
+		$api_name = $request->get( INPUT_GET, 'api' );
 		if ( $api_name === null ) {
-			return new Response( 400 );
+			return Response::from_error( 400, 'API not specified' );
 		}
 
 		// Check for the HTTP method
 		$method = $request->get( INPUT_SERVER, 'REQUEST_METHOD' );
 		// ToDo: Support HEAD
 		if ( $method !== 'GET' and $method !== 'POST' ) {
-			return new Response( 405 );
+			return Response::from_error( 405,
+				'The API does not support this method' );
 		}
 
 		// Extract the ID
 		$id = $request->filter( INPUT_GET, "id", FILTER_VALIDATE_INT );
 		if ( $id === false ) {
-			return new Response( 400 );
+			return Response::from_error( 400, 'ID is not a valid integer' );
 		}
 
 		foreach ( $apis as $api ) {
@@ -94,23 +100,25 @@ abstract class Api {
 			if ( $method === 'GET' ) {
 				return $api->handle_get( $request, $id );
 			} elseif ( $method === 'POST' ) {
-				if ( $id === null ) {
-					return new Response( 400 );
+				$key   = $request->get( INPUT_POST, self::KEY_NAME );
+				$value = $request->get( INPUT_POST, self::VALUE_NAME );
+				if ( $id === null || $key === null || $value === null ) {
+					return Response::from_error( 400,
+						'Id, key, or value missing' );
 				}
 
-				$key   = $request->get( INPUT_POST, "attribute" );
-				$value = $request->get( INPUT_POST, "value" );
-				if ( ! is_null( $value ) ) {
-					$value = @json_decode( $value );
+				// Try to parse the value as JSON
+				try {
+					$value = json_decode( $value, JSON_THROW_ON_ERROR );
 				}
-				if ( is_null( $key ) or is_null( $value ) ) {
-					return new Response( 400 );
+				catch ( JsonException $ex ) {
+					return Response::from_error( 400, 'Value is invalid JSON' );
 				}
 
 				return $api->handle_post( $request, $id, $key, $value );
 			}
 		}
 
-		return new Response( 404 );
+		return Response::from_error( 404, 'API not found' );
 	}
 }
