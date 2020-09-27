@@ -3,6 +3,7 @@
 namespace larry;
 
 use larry\api\Api;
+use larry\api\Availabilities;
 use larry\api\Request;
 use larry\api\Users;
 
@@ -18,5 +19,5 @@ if ( $context === null ) {
 
 // Create, parse, and respond the request
 $request  = Request::from_server( $context );
-$response = Api::parse( $request, array( new Users() ) );
+$response = Api::parse( $request, array( new Users(), new Availabilities() ) );
 $response->send();
